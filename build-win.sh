@@ -2,8 +2,6 @@
 
 set -e
 
-cd /udt/zsign
-
 function build-mman() {
     cd mman-win32
     ./configure --cross-prefix=x86_64-w64-mingw32-
