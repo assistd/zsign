@@ -1,0 +1,13 @@
+[submodule "mman-win32"]
+	path = mman-win32
+	url = git@github.com:witwall/mman-win32
+[submodule "dirent"]
+	path = dirent
+	url = git@github.com:tronkko/dirent.git
+[submodule "openssl"]
+	path = openssl
+	url = git@github.com:openssl/openssl
+	branch = OpenSSL_1_0_2-stable
+[submodule "zsign"]
+	path = zsign
+	url = git@github.com:zhlynn/zsign.git

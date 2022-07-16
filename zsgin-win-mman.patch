@@ -1,0 +1,23 @@
+diff --git a/common/common.h b/common/common.h
+index 0e1592b..9aeb052 100644
+--- a/common/common.h
++++ b/common/common.h
+@@ -4,7 +4,11 @@
+ #include <stdio.h>
+ #include <stdint.h>
+ #include <stdarg.h>
++#if defined(WINDOWS)
++#include <mman.h>
++#else
+ #include <sys/mman.h>
++#endif
+ #include <errno.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+@@ -157,4 +161,4 @@ public:
+ 
+ private:
+     static int g_nLogLevel;
+-};
+\ No newline at end of file
++};

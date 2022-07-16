@@ -1,0 +1,25 @@
+commit 24a591e39956fe4317e303cf138f34edbd9be42b
+Author: Marek Forys <m.forys@tricentis.com>
+Date:   Thu Apr 21 16:55:47 2022 +0200
+
+    fix: use function _fullpath correctly in GetCanonicalizePath on Windows OS
+    
+    Signed-off-by: Marek Forys <forys@o2.pl>
+
+diff --git a/common/common.cpp b/common/common.cpp
+index b25dadc..d6533fd 100644
+--- a/common/common.cpp
++++ b/common/common.cpp
+@@ -295,11 +295,9 @@ string GetCanonicalizePath(const char *szPath)
+ 
+ #if defined(WINDOWS)
+ 
+-			if (NULL != _fullpath((char *)"./", path, PATH_BUFFER_LENGTH))
++			if (NULL != _fullpath(path, szPath, PATH_BUFFER_LENGTH))
+ 			{
+ 				strPath = path;
+-				strPath += "/";
+-				strPath += szPath;
+ 			}
+ #else
+ 			if (NULL != realpath("./", path))
