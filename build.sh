@@ -21,10 +21,11 @@ function patch-zsign() {
    cd zsign
    patch -Np1 < ../zsgin-win-mman.patch
    patch -Np1 < ../zsign-win-path.patch
+   patch -Np1 < ../zsgin-linux-cmake.patch
    cd -
 }
 
-function build-zsign() {
+function build-zsign-win() {
     cd zsign
     x86_64-w64-mingw32-g++  *.cpp common/*.cpp -o zsign.exe \
         -I../dirent/include/ \
@@ -33,8 +34,15 @@ function build-zsign() {
     cd -
 }
 
+function build-zsign-linux() {
+    cd zsign
+    mkdir build && cd build && cmake .. && make -j
+    cd -
+}
+
 
 build-mman
 build-openssl
 patch-zsign
-build-zsign
+build-zsign-win
+build-zsign-linux
