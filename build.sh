@@ -12,6 +12,8 @@ function build-mman() {
 function build-openssl() {
     cd openssl
     git checkout OpenSSL_1_0_2s
+    sync; sync;
+    git clean -xdf
     ./Configure --cross-compile-prefix=x86_64-w64-mingw32- mingw64
     make -j
     cd -
