@@ -11,3 +11,6 @@
 [submodule "zsign"]
 	path = zsign
 	url = git@github.com:zhlynn/zsign.git
+[submodule "minizip-ng"]
+	path = minizip-ng
+	url = git@github.com:zlib-ng/minizip-ng.git
