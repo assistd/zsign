@@ -21,9 +21,10 @@ function build-openssl() {
 
 function patch-zsign() {
    cd zsign
-   patch -Np1 < ../zsgin-win-mman.patch
-   patch -Np1 < ../zsign-win-path.patch
-   patch -Np1 < ../zsgin-libzip.patch
+   #patch -Np1 < ../zsgin-win-mman.patch
+   #patch -Np1 < ../zsign-win-path.patch
+   #patch -Np1 < ../zsgin-libzip.patch
+   patch -Np1 < ../zsign.patch
    cd -
 }
 
