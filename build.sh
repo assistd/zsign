@@ -32,7 +32,7 @@ function build-zsign-win() {
     cd zsign
     x86_64-w64-mingw32-g++  *.cpp common/*.cpp -o zsign.exe \
         -I../dirent/include/ \
-        -lcrypto -I../mman-win32 -std=c++11  -I../openssl/include/  -DWINDOWS -L../openssl -L../mman-win32 \
+        -lcrypto -I../mman-win32 -std=c++17  -I../openssl/include/  -DWINDOWS -L../openssl -L../mman-win32 \
         -lmman -lgdi32 -m64 -static -static-libgcc
     cd -
 }

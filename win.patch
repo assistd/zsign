@@ -1,0 +1,99 @@
+diff --git a/common/common.cpp b/common/common.cpp
+index d6533fd..dc956b4 100644
+--- a/common/common.cpp
++++ b/common/common.cpp
+@@ -4,6 +4,7 @@
+ #include <sys/stat.h>
+ #include <inttypes.h>
+ #include <openssl/sha.h>
++#include <filesystem>
+ 
+ #define PARSEVALIST(szFormatArgs, szArgs)                       \
+ 	ZBuffer buffer;                                             \
+@@ -232,7 +233,9 @@ bool RemoveFolder(const char *szFolder)
+ 		RemoveFile(szFolder);
+ 		return true;
+ 	}
+-	return nftw(szFolder, RemoveFolderCallBack, 64, FTW_DEPTH | FTW_PHYS);
++	//return nftw(szFolder, RemoveFolderCallBack, 64, FTW_DEPTH | FTW_PHYS);
++	std::filesystem::remove_all(szFolder);
++	return true;
+ }
+ 
+ bool RemoveFolderV(const char *szFormatPath, ...)
+@@ -445,7 +448,7 @@ bool SystemExec(const char *szFormatCmd, ...)
+ 		}
+ #endif
+ 	}
+-	return false;
++	return true;
+ }
+ 
+ uint16_t _Swap(uint16_t value)
+diff --git a/zsign.cpp b/zsign.cpp
+index 2b8c283..0918969 100644
+--- a/zsign.cpp
++++ b/zsign.cpp
+@@ -198,23 +198,28 @@ int main(int argc, char *argv[])
+ 		return -1;
+ 	}
+ 
++	char curDir[PATH_MAX] = "D:";
++	getcwd(curDir, PATH_MAX);
++
+ 	bool bEnableCache = true;
+ 	string strFolder = strPath;
+ 	if (bZipFile)
+ 	{ //ipa file
+ 		bForce = true;
+ 		bEnableCache = false;
+-		StringFormat(strFolder, "/tmp/zsign_folder_%llu", timer.Reset());
++		StringFormat(strFolder, "%s/zsign_folder_%llu", curDir, timer.Reset());
+ 		ZLog::PrintV(">>> Unzip:\t%s (%s) -> %s ... \n", strPath.c_str(), GetFileSizeString(strPath.c_str()).c_str(), strFolder.c_str());
+ 		RemoveFolder(strFolder.c_str());
+-#if defined(_WIN32)
+-		if (!SystemExec("7za x %s -o%s", strPath.c_str(), strFolder.c_str()))
+-#else
+-		if (zip_extract(strPath.c_str(), strFolder.c_str()) != 0)
+-#endif
+ 		/*
+ 		if (!SystemExec("unzip -qq -d '%s' '%s'", strFolder.c_str(), strPath.c_str()))
+ 		*/
++#if !defined(_WIN32)
++		if (zip_extract(strPath.c_str(), strFolder.c_str()) != 0)
++
++#else
++		ZLog::PrintV("7za x %s -o%s\n", strPath.c_str(), strFolder.c_str());
++		if (!SystemExec("7za x %s -o%s", strPath.c_str(), strFolder.c_str()))
++#endif
+ 		{
+ 			RemoveFolder(strFolder.c_str());
+ 			ZLog::ErrorV(">>> Unzip Failed!\n");
+@@ -230,7 +235,7 @@ int main(int argc, char *argv[])
+ 
+ 	if (bInstall && strOutputFile.empty())
+ 	{
+-		StringFormat(strOutputFile, "/tmp/zsign_temp_%llu.ipa", GetMicroSecond());
++		StringFormat(strOutputFile, "%s/zsign_temp_%llu.ipa", curDir, GetMicroSecond());
+ 	}
+ 
+ 	if (!strOutputFile.empty())
+@@ -277,12 +282,16 @@ int main(int argc, char *argv[])
+ 		SystemExec("ideviceinstaller -i '%s'", strOutputFile.c_str());
+ 	}
+ 
+-	if (0 == strOutputFile.find("/tmp/zsign_tmp_"))
++	char pathPrefix[PATH_MAX] = {0};
++	sprintf(pathPrefix, "%s/zsign_tmp_", curDir);
++
++	if (0 == strOutputFile.find(pathPrefix))
+ 	{
+ 		RemoveFile(strOutputFile.c_str());
+ 	}
+ 
+-	if (0 == strFolder.find("/tmp/zsign_folder_"))
++	sprintf(pathPrefix, "%s/zsign_folder_", curDir);
++	if (0 == strFolder.find(pathPrefix))
+ 	{
+ 		RemoveFolder(strFolder.c_str());
+ 	}
