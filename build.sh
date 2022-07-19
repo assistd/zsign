@@ -44,8 +44,8 @@ function build-zsign-linux() {
 }
 
 
-build-mman
-build-openssl
-patch-zsign
+#build-mman
+#build-openssl
+#patch-zsign
 build-zsign-win
-build-zsign-linux
+#build-zsign-linux

@@ -348,7 +348,7 @@ index 0000000..7b0b7ac
 +#endif // __LIBZIP_H__
 \ No newline at end of file
 diff --git a/zsign.cpp b/zsign.cpp
-index 2698cf9..d845444 100644
+index 2698cf9..2b8c283 100644
 --- a/zsign.cpp
 +++ b/zsign.cpp
 @@ -6,6 +6,9 @@
@@ -366,7 +366,7 @@ index 2698cf9..d845444 100644
  		ZLog::PrintV(">>> Unzip:\t%s (%s) -> %s ... \n", strPath.c_str(), GetFileSizeString(strPath.c_str()).c_str(), strFolder.c_str());
  		RemoveFolder(strFolder.c_str());
 +#if defined(_WIN32)
-+		if (!SystemExec("7z x %s -o%s", strPath.c_str(), strFolder.c_str()))
++		if (!SystemExec("7za x %s -o%s", strPath.c_str(), strFolder.c_str()))
 +#else
 +		if (zip_extract(strPath.c_str(), strFolder.c_str()) != 0)
 +#endif
@@ -382,7 +382,7 @@ index 2698cf9..d845444 100644
  				RemoveFile(strOutputFile.c_str());
 +
 +#if defined(_WIN32)
-+				SystemExec("7z a -tzip %s Payload", strOutputFile.c_str());
++				SystemExec("7za a -tzip %s Payload", strOutputFile.c_str());
 +#else
 +				zip_compress("Payload", strOutputFile.c_str(), uZipLevel);
 +#endif
