@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index acf8e35..c2a5423 100644
+index acf8e35..4f500de 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 3.14)
@@ -26,12 +26,15 @@ index acf8e35..c2a5423 100644
      find_package(OpenSSL REQUIRED)
  endif()
  
-@@ -36,8 +46,19 @@ list(APPEND LIB_LIST ${ZLIB_LIBRARIES})
+@@ -36,8 +46,27 @@ list(APPEND LIB_LIST ${ZLIB_LIBRARIES})
  
  # Main sources
  
--file(GLOB SRC common/*.cpp ./**.cpp)
++if (WIN32)
+ file(GLOB SRC common/*.cpp ./**.cpp)
++else()
 +file(GLOB SRC common/*.cpp ./**.cpp libzip.c)
++endif()
  
  add_executable(zsign ${SRC})
 -target_link_libraries(zsign ${LIB_LIST})
@@ -44,8 +47,12 @@ index acf8e35..c2a5423 100644
 +#find_package(ZLIB REQUIRED)
 +#target_link_libraries(zsign PRIVATE ZLIB::ZLIB)
 +
++if (!WIN32)
 +target_link_libraries(zsign PRIVATE minizip)
-+target_link_libraries(zsign PRIVATE OpenSSL::Crypto)
++endif()
++
++# target_link_libraries(zsign PRIVATE OpenSSL::Crypto)
++target_link_libraries(zsign PRIVATE ${OPENSSL_LIBRARIES})
 +find_package(Threads REQUIRED)
 +target_link_libraries(zsign PRIVATE Threads::Threads)
 diff --git a/common/common.cpp b/common/common.cpp
@@ -341,7 +348,7 @@ index 0000000..7b0b7ac
 +#endif // __LIBZIP_H__
 \ No newline at end of file
 diff --git a/zsign.cpp b/zsign.cpp
-index 2698cf9..ef7858d 100644
+index 2698cf9..1426e5b 100644
 --- a/zsign.cpp
 +++ b/zsign.cpp
 @@ -6,6 +6,7 @@
@@ -352,28 +359,34 @@ index 2698cf9..ef7858d 100644
  
  const struct option options[] = {
  	{"debug", no_argument, NULL, 'd'},
-@@ -204,7 +205,11 @@ int main(int argc, char *argv[])
+@@ -204,7 +205,14 @@ int main(int argc, char *argv[])
  		StringFormat(strFolder, "/tmp/zsign_folder_%llu", timer.Reset());
  		ZLog::PrintV(">>> Unzip:\t%s (%s) -> %s ... \n", strPath.c_str(), GetFileSizeString(strPath.c_str()).c_str(), strFolder.c_str());
  		RemoveFolder(strFolder.c_str());
++#if defined(_WIN32)
++		if (!SystemExec("7z x %s -o%s", strPath.c_str(), strFolder.c_str()))
++#else
++		if (zip_extract(strPath.c_str(), strFolder.c_str()) != 0)
++#endif
 +		/*
  		if (!SystemExec("unzip -qq -d '%s' '%s'", strFolder.c_str(), strPath.c_str()))
 +		*/
-+		if (zip_extract(strPath.c_str(), strFolder.c_str()) != 0)
-+		//*/
  		{
  			RemoveFolder(strFolder.c_str());
  			ZLog::ErrorV(">>> Unzip Failed!\n");
-@@ -242,7 +247,12 @@ int main(int argc, char *argv[])
+@@ -242,7 +250,15 @@ int main(int argc, char *argv[])
  			{
  				uZipLevel = uZipLevel > 9 ? 9 : uZipLevel;
  				RemoveFile(strOutputFile.c_str());
 +
++#if defined(_WIN32)
++				SystemExec("7z a -tzip %s Payload", strOutputFile.c_str());
++#else
++				zip_compress("Payload", strOutputFile.c_str(), uZipLevel);
++#endif
 +				/*
  				SystemExec("zip -q -%u -r '%s' Payload", uZipLevel, strOutputFile.c_str());
-+				/*/
-+				zip_compress("Payload", strOutputFile.c_str(), uZipLevel);
-+				//*/
++				*/
  				chdir(szOldFolder);
  				if (!IsFileExists(strOutputFile.c_str()))
  				{
